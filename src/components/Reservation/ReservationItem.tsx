@@ -33,7 +33,7 @@ const ReservationItem = ({
   return (
     <Card size={"sm"}>
       <CardHeader>
-        <Heading size="md">{`Réservation de ${reservation.userSnapshot.name} ${reservation.userSnapshot.firstName}`}</Heading>
+        <Heading size="md">{`Réservation de ${reservation.userSnapshot.firstName} ${reservation.userSnapshot.name}`}</Heading>
       </CardHeader>
       <CardBody>
         <Image
