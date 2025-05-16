@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Box,
-  Button,
+  Button, Flex,
   Heading,
   List,
   ListItem,
@@ -53,12 +53,14 @@ const AccountList = () => {
   };
 
   return (
-    <Box p={4}>
-      <Heading as="h2" size="md" mb={4}>
+    <Box>
+      <Heading as="h3" size="md" mb={4} fontWeight="medium" textAlign="center">
         {"Liste des utilisateurs"}
       </Heading>
       {accountsAreLoading ? (
-        <Spinner />
+        <Flex justify="center" my={4}>
+          <Spinner color="primary.500" />
+        </Flex>
       ) : (
         <List spacing={3}>
           {accounts.map((account) => (
@@ -67,16 +69,25 @@ const AccountList = () => {
               display="flex"
               justifyContent="space-between"
               alignItems="center"
+              p={3}
+              borderRadius="md"
+              boxShadow="xs"
+              bg="white"
+              _hover={{ boxShadow: "sm", bg: "gray.50" }}
+              transition="all 0.2s"
             >
               <Box display="flex" gap={2} alignItems="center">
-                <Tag colorScheme="blue">{account.role}</Tag>
-                {account.firstName} {account.name} ({account.phoneNumber})
+                <Tag colorScheme="primary" borderRadius="full">{account.role}</Tag>
+                <Box fontWeight="medium">{account.firstName} {account.name}</Box>
+                <Box color="gray.600" fontSize="sm">({account.phoneNumber})</Box>
               </Box>
               <Button
                 colorScheme="red"
                 variant={"outline"}
                 onClick={() => handleDelete(account.id)}
                 size={"sm"}
+                borderRadius="md"
+                _hover={{ bg: "red.50" }}
               >
                 Supprimer
               </Button>

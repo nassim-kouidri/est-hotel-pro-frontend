@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
 import {
+  Box,
   Container,
   Divider,
+  Flex,
+  Heading,
+  Icon,
   SimpleGrid,
   Spacer,
   Spinner,
   Text,
+  useColorModeValue,
 } from "@chakra-ui/react";
+import { InfoIcon } from "@chakra-ui/icons";
 import { HotelRoom } from "../../interfaces/HotelRoom";
 import { HotelRoomService } from "../../services/HotelRoomService";
 import HotelRoomItem from "./HotelRoomItem";
@@ -20,6 +26,9 @@ const HotelRoomList = () => {
   const [hotelRooms, setHotelRooms] = useState<HotelRoom[]>([]);
   const [hotelRoomsAreLoading, setHotelRoomsAreLoading] =
     useState<boolean>(false);
+
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
 
   const [selectedHotelRoomFilters, setSelectedHotelRoomFilters] =
     useState<SelectedHotelRoomFilters>({
@@ -93,35 +102,46 @@ const HotelRoomList = () => {
           onClose={closeModal}
         />
       )}
-      <Container>
-        <HotelRoomFilters sendFilters={applyFilters} />
-      </Container>
+      <Box 
+        bg={bgColor} 
+        borderRadius="lg" 
+        boxShadow="sm"
+        p={4}
+        mb={6}
+        borderWidth="1px"
+        borderColor={borderColor}
+      >
+        <Flex align="center" mb={4}>
+          <Icon as={InfoIcon} mr={2} color="primary.500" />
+          <Heading size="md" fontWeight="medium">Filtres</Heading>
+        </Flex>
 
-      <Spacer h={6} />
+        <HotelRoomFilters sendFilters={applyFilters} />
+      </Box>
+
+      <Spacer h={2} />
       <Divider />
       <Spacer h={6} />
 
-      <Container maxW={"container.xl"}>
-        {hotelRoomsAreLoading ? (
-          <Spinner />
-        ) : (
-          <>
-            {hotelRooms.length === 0 ? (
-              <Text>{"Aucune chambre trouvée"}</Text>
-            ) : (
-              <SimpleGrid columns={3} spacing={6}>
-                {hotelRooms.map((hotelRoom) => (
-                  <HotelRoomItem
-                    key={hotelRoom.id}
-                    hotelRoom={hotelRoom}
-                    openDetailedModal={openDetailedModal}
-                  />
-                ))}
-              </SimpleGrid>
-            )}
-          </>
-        )}
-      </Container>
+      {hotelRoomsAreLoading ? (
+        <Spinner />
+      ) : (
+        <>
+          {hotelRooms.length === 0 ? (
+            <Text>{"Aucune chambre trouvée"}</Text>
+          ) : (
+            <SimpleGrid columns={3} spacing={6}>
+              {hotelRooms.map((hotelRoom) => (
+                <HotelRoomItem
+                  key={hotelRoom.id}
+                  hotelRoom={hotelRoom}
+                  openDetailedModal={openDetailedModal}
+                />
+              ))}
+            </SimpleGrid>
+          )}
+        </>
+      )}
     </>
   );
 };

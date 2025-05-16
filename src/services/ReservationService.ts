@@ -1,6 +1,8 @@
 import axios from "axios";
 import {
   CreateReservation,
+  MonthlyCalendarResponse,
+  Page,
   Reservation,
   ReservationChartData,
 } from "../interfaces/Reservation";
@@ -16,15 +18,23 @@ const getReservationById = async (token: string, reservationId: string) => {
 
 const getAllReservations = async (
   token: string,
+  page: number = 0,
+  size: number = 9,
   status?: string,
-  hotelRoomId?: string
+  hotelRoomId?: string,
+  startDate?: string,
+  endDate?: string
 ) => {
-  return axios.get<Reservation[]>(
-    `${API_BASE_URL}/ede-api/v1/reservations/filter`,
+  return axios.get<Page<Reservation>>(
+    `${API_BASE_URL}/ede-api/v1/reservations/filter/pageable`,
     {
       params: {
+        page,
+        size,
         ...(status && { status }),
         ...(hotelRoomId && { hotelRoomId }),
+        startDate,
+        endDate,
       },
       headers: {
         Authorization: `Bearer ${token}`,
@@ -82,6 +92,21 @@ const deleteReservation = async (token: string, reservationId: string) => {
   );
 };
 
+const getMonthlyCalendar = async (token: string, year: number, month: number) => {
+  return axios.get<MonthlyCalendarResponse>(
+    `${API_BASE_URL}/ede-api/v1/reservations/calendar/monthly`,
+    {
+      params: {
+        year,
+        month,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
 export const ReservationService = {
   getReservationById,
   getAllReservations,
@@ -89,4 +114,5 @@ export const ReservationService = {
   createReservation,
   updateReservation,
   deleteReservation,
+  getMonthlyCalendar,
 };

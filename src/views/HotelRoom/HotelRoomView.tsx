@@ -1,4 +1,4 @@
-import { Button, Heading, Spacer } from "@chakra-ui/react";
+import { Button, Heading, Flex, Box, useColorModeValue } from "@chakra-ui/react";
 import PageContainer from "../../layout/PageContainer";
 import { useNavigate } from "react-router-dom";
 import { AddIcon } from "@chakra-ui/icons";
@@ -11,20 +11,36 @@ const HotelRoomView = () => {
     navigate("creation");
   };
 
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+
   return (
     <PageContainer>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Heading>{"Chambres"}</Heading>
-        <Button
-          leftIcon={<AddIcon />}
-          onClick={navigateToCreationReservation}
-          alignSelf={"flex-end"}
-          colorScheme="primary"
-        >
-          {"Ajouter une chambre"}
-        </Button>
-      </div>
-      <Spacer height={"4rem"} />
+      <Box 
+        bg={bgColor} 
+        borderRadius="lg" 
+        boxShadow="sm"
+        p={5}
+        mb={6}
+        borderWidth="1px"
+        borderColor={borderColor}
+      >
+        <Flex justifyContent="space-between" alignItems="center">
+          <Heading size="lg" fontWeight="bold" color="gray.700">
+            {"Chambres"}
+          </Heading>
+          <Button
+            leftIcon={<AddIcon />}
+            onClick={navigateToCreationReservation}
+            colorScheme="primary"
+            size="md"
+            boxShadow="sm"
+            _hover={{ boxShadow: "md" }}
+          >
+            {"Ajouter une chambre"}
+          </Button>
+        </Flex>
+      </Box>
       <HotelRoomList />
     </PageContainer>
   );

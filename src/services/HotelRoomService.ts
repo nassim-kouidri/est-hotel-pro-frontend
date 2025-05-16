@@ -91,6 +91,35 @@ const deleteRoom = async (token: string, roomId: string) => {
   });
 };
 
+const getAvailableRoomsOnDate = async (token: string, date: string) => {
+  return axios.get<HotelRoom[]>(
+    `${API_BASE_URL}/ede-api/v1/hotel-rooms/available-on-date`,
+    {
+      params: {
+        date,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+const getAvailableRoomsBetweenDates = async (token: string, startDate: string, endDate: string) => {
+  return axios.get<HotelRoom[]>(
+    `${API_BASE_URL}/ede-api/v1/hotel-rooms/available-between-dates`,
+    {
+      params: {
+        startDate,
+        endDate,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
 export const HotelRoomService = {
   getRoomById,
   getFilteredRooms,
@@ -100,4 +129,6 @@ export const HotelRoomService = {
   createRoom,
   updateRoom,
   deleteRoom,
+  getAvailableRoomsOnDate,
+  getAvailableRoomsBetweenDates,
 };

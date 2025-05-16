@@ -27,9 +27,16 @@ const CustomInput = ({
       {...register(name)}
       min={min}
       max={max}
-      focusBorderColor="primary.300"
+      focusBorderColor="primary.400"
       variant={"outline"}
       isDisabled={disabled}
+      borderRadius="md"
+      size="md"
+      _focus={{
+        boxShadow: "0 0 0 1px var(--chakra-colors-primary-400)",
+        bg: "white",
+      }}
+      transition="all 0.2s"
     />
   );
 };

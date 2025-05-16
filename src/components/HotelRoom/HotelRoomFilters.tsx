@@ -40,11 +40,13 @@ const HotelRoomFilters = ({ sendFilters }: HotelRoomFiltersProps) => {
 
   return (
     <form>
-      <div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
+      <div style={{ display: "flex", flexDirection: "row", gap: "12px" }}>
         <Select
           {...register("roomStatus")}
           placeholder={"Sélectionner un statut"}
           focusBorderColor="primary.300"
+          size="md"
+          bg="white"
         >
           <option value={RESERVED}>{"Réservée"}</option>
           <option value={AVAILABLE}>{"Libre"}</option>
@@ -53,6 +55,8 @@ const HotelRoomFilters = ({ sendFilters }: HotelRoomFiltersProps) => {
           {...register("categoryRoom")}
           placeholder={"Sélectionner une catégorie"}
           focusBorderColor="primary.300"
+          size="md"
+          bg="white"
         >
           {CATEGORIES_ROOM.map((category) => (
             <option value={category} key={category}>

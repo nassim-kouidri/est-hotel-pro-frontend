@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import CustomFormControl from "../Form/CustomFormControl";
 import CustomInput from "../Form/CustomInput";
-import { Button, Spacer } from "@chakra-ui/react";
+import { Button, Spacer, VStack } from "@chakra-ui/react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CHAMP_OBLIGATOIRE } from "../../data/constants";
@@ -54,13 +54,7 @@ const RegisterForm = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "25px",
-        }}
-      >
+      <VStack spacing={5}>
         <CustomFormControl label="Nom" errorField={errors.name} isRequired>
           <CustomInput
             type="text"
@@ -109,11 +103,16 @@ const RegisterForm = ({
           colorScheme={"primary"}
           isLoading={formIsSubmitting}
           isDisabled={!isValid}
+          size="md"
+          width="100%"
+          mt={2}
+          boxShadow="sm"
+          _hover={{ boxShadow: "md" }}
         >
           {"Enregistrer"}
         </Button>
-      </div>
-      <Spacer height={"25px"} />
+      </VStack>
+      <Spacer height={"20px"} />
     </form>
   );
 };

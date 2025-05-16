@@ -1,5 +1,4 @@
 import "./index.css";
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import {
@@ -21,6 +20,10 @@ import AccountView from "./views/AccountView.tsx";
 import UnauthorizedView from "./views/UnauthorizedView.tsx";
 import AdministrationView from "./views/AdministrationView.tsx";
 import StatisticView from "./views/StatisticView.tsx";
+import { setupAxiosInterceptors } from "./axiosConfig.ts";
+
+// Set up axios interceptors for handling 403 errors
+setupAxiosInterceptors();
 
 const colors = {
   primary: {
@@ -121,13 +124,11 @@ const router = createBrowserRouter([
   },
 ]);
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <ChakraProvider theme={theme}>
-      <ToastContextProvider>
-        <AuthProvider>
-          <RouterProvider router={router} />
-        </AuthProvider>
-      </ToastContextProvider>
-    </ChakraProvider>
-  </StrictMode>
+  <ChakraProvider theme={theme}>
+    <ToastContextProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ToastContextProvider>
+  </ChakraProvider>
 );

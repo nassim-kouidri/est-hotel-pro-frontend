@@ -1,4 +1,4 @@
-import { Heading, Spacer } from "@chakra-ui/react";
+import { Box, Heading, Flex, Divider, Image, useColorModeValue } from "@chakra-ui/react";
 import HotelRoomForm from "../../components/HotelRoom/HotelRoomForm";
 import PageContainer from "../../layout/PageContainer";
 import { CreateHotelRoom } from "../../interfaces/HotelRoom";
@@ -8,6 +8,7 @@ import { useToasts } from "../../contexts/toast";
 import { useState } from "react";
 import { FormMode } from "../../helpers/FormUtils";
 import { useNavigate } from "react-router-dom";
+import logoImage from "../../assets/logo-est-hotel-pro.png";
 
 const HotelRoomCreationView = () => {
   const [formIsSubmitting, setFormIsSubmitting] = useState<boolean>(false);
@@ -37,27 +38,42 @@ const HotelRoomCreationView = () => {
     }
   };
 
+  // Color mode values for consistent theming
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+
   return (
     <PageContainer>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
+      <Box 
+        maxWidth={"900px"} 
+        mx="auto" 
+        p={6} 
+        borderRadius="lg" 
+        boxShadow="md" 
+        bg={bgColor}
+        borderWidth="1px"
+        borderColor={borderColor}
       >
-        <div style={{ width: "750px" }}>
-          <Heading as="h3" size="lg">
+        <Flex direction="column" align="center" mb={6}>
+          <Image
+            src={logoImage}
+            alt="Est Hotel Pro Logo"
+            maxWidth="180px"
+            mb={4}
+          />
+          <Heading as="h2" size="lg" textAlign={"center"} fontWeight="medium" color="gray.700">
             {"Nouvelle chambre"}
           </Heading>
-          <Spacer h={6} />
-          <HotelRoomForm
-            submitFunction={addReservation}
-            formIsSubmitting={formIsSubmitting}
-            formMode={FormMode.CREATION}
-          />
-        </div>
-      </div>
+        </Flex>
+
+        <Divider my={5} />
+
+        <HotelRoomForm
+          submitFunction={addReservation}
+          formIsSubmitting={formIsSubmitting}
+          formMode={FormMode.CREATION}
+        />
+      </Box>
     </PageContainer>
   );
 };

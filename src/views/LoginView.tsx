@@ -1,4 +1,4 @@
-import { Box, Heading, Spacer } from "@chakra-ui/react";
+import { Box, Heading, Spacer, Flex, Image } from "@chakra-ui/react";
 import LoginForm from "../components/Login/LoginForm";
 import PageContainer from "../layout/PageContainer";
 import { useState } from "react";
@@ -7,6 +7,7 @@ import { Login } from "../interfaces/Login";
 import { useAuth } from "../contexts/auth";
 import { useNavigate } from "react-router-dom";
 import { useToasts } from "../contexts/toast";
+import logoImage from "../assets/logo-est-hotel-pro.png";
 
 const LoginView = () => {
   const [formIsSubmitting, setFormIsSubmitting] = useState(false);
@@ -38,11 +39,26 @@ const LoginView = () => {
   };
   return (
     <PageContainer>
-      <Box maxWidth={"380px"} style={{ margin: "auto" }}>
-        <Heading as="h3" size="lg" textAlign={"center"}>
-          {"Connexion"}
-        </Heading>
-        <Spacer h={6} />
+      <Box 
+        maxWidth={"380px"} 
+        mx="auto" 
+        p={6} 
+        borderRadius="md" 
+        boxShadow="sm" 
+        bg="white"
+      >
+        <Flex direction="column" align="center" mb={4}>
+          <Image 
+            src={logoImage} 
+            alt="Est Hotel Pro Logo" 
+            maxWidth="180px" 
+            mb={4}
+          />
+          <Heading as="h3" size="lg" textAlign={"center"} fontWeight="medium">
+            {"Connexion"}
+          </Heading>
+        </Flex>
+        <Spacer h={4} />
         <LoginForm submitFunction={login} formIsSubmitting={formIsSubmitting} />
       </Box>
     </PageContainer>

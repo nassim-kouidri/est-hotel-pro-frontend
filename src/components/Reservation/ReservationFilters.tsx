@@ -44,11 +44,13 @@ const ReservationFilters = ({
 
   return (
     <form>
-      <div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         <Select
           {...register("status")}
           placeholder={"Sélectionner un statut"}
           focusBorderColor="primary.300"
+          size="md"
+          bg="white"
         >
           {RESERVATION_STATUS.map((status) => (
             <option key={status} value={status}>
@@ -60,6 +62,8 @@ const ReservationFilters = ({
           {...register("hotelRoomId")}
           placeholder={"Sélectionner une chambre"}
           focusBorderColor="primary.300"
+          size="md"
+          bg="white"
         >
           {hotelRooms.map((hotelRoom) => (
             <option key={hotelRoom.id} value={hotelRoom.id}>

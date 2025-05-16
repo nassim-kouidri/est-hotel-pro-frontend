@@ -15,8 +15,8 @@ const CustomFormControl = ({
   errorField,
 }: FormControlProps) => {
   return (
-    <FormControl isInvalid={!!errorField} isRequired={isRequired}>
-      <FormLabel>{label}</FormLabel>
+    <FormControl isInvalid={!!errorField} isRequired={isRequired} mb={1}>
+      <FormLabel fontWeight="medium" mb={1}>{label}</FormLabel>
       {children}
       <FormErrorMessage style={{ fontWeight: "600" }}>
         {errorField && errorField.message}

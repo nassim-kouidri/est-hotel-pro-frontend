@@ -42,3 +42,25 @@ export interface ReservationChartData {
   id: string;
   startDate: string;
 }
+
+export interface Page<T> {
+  content: T[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+  first: boolean;
+  size: number;
+  number: number;
+  numberOfElements: number;
+  empty: boolean;
+}
+
+export interface MonthlyCalendarResponse {
+  year: number;
+  month: number;
+  dailyReservationCounts: Record<string, number>;
+}

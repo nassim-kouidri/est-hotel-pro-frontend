@@ -30,8 +30,11 @@ const PasswordInput = ({ name, register, placeholder }: PasswordInputProps) => {
         <Button
           h="1.75rem"
           size="sm"
-          backgroundColor={"white"}
+          variant="ghost"
+          color="gray.500"
           onClick={handleClick}
+          _hover={{ color: "primary.500", bg: "gray.50" }}
+          transition="all 0.2s"
         >
           {showPassword ? <ViewOffIcon /> : <ViewIcon />}
         </Button>

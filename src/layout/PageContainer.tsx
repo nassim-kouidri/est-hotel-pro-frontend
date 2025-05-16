@@ -1,3 +1,5 @@
+import * as React from "react";
+
 type PageContainerProps = {
   children: React.ReactNode;
 };
@@ -6,7 +8,7 @@ const PageContainer = ({ children }: PageContainerProps) => {
   return (
     <div
       style={{
-        maxWidth: "1300px",
+        maxWidth: "1500px",
         margin: "auto",
         paddingTop: "30px",
         paddingLeft: "10px",
