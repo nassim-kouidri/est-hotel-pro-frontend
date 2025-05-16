@@ -14,7 +14,7 @@ import { ReservationService } from "../../services/ReservationService";
 import { useAuth } from "../../contexts/auth";
 import { ReservationChartData } from "../../interfaces/Reservation";
 import moment from "moment";
-import { Box, Center, Spinner, Text } from "@chakra-ui/react";
+import { Center, Spinner, Text } from "@chakra-ui/react";
 import { useToasts } from "../../contexts/toast";
 
 const ReservationChart = () => {
