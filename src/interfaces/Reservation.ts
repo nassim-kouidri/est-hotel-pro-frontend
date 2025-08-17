@@ -22,6 +22,8 @@ export interface CreateReservation {
   numberOfAdults: number;
   pricePaid: number;
   review?: number;
+  isContracted: boolean;
+  companyName?: string;
 }
 
 export interface Reservation {
@@ -36,6 +38,8 @@ export interface Reservation {
   pricePaid: number;
   review: number;
   status: ReservationStatus;
+  isContracted: boolean;
+  companyName?: string;
 }
 
 export interface ReservationChartData {

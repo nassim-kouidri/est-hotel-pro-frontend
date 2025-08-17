@@ -21,6 +21,9 @@ import {
   Spinner,
   Alert,
   AlertIcon,
+  Switch,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
 import { FaUser, FaBed, FaCalendarAlt, FaUsers, FaStar, FaInfoCircle } from "react-icons/fa";
 import * as yup from "yup";
@@ -55,6 +58,8 @@ interface IReservationFormValues {
   numberOfAdults: number;
   pricePaid: number;
   review?: number | null;
+  isContracted: boolean;
+  companyName?: string;
 }
 
 const reservationFormValidationSchema = yup.object().shape({
@@ -86,6 +91,12 @@ const reservationFormValidationSchema = yup.object().shape({
     .min(0, "Ce champ ne peut pas être négatif")
     .max(5, "La note doit être comprise entre 0 et 5")
     .transform((val) => (val === Number(val) ? val : null)),
+  isContracted: yup.boolean().required().default(false),
+  companyName: yup.string().when('isContracted', {
+    is: true,
+    then: (schema) => schema.required("Le nom de l'entreprise est obligatoire pour les clients conventionnés"),
+    otherwise: (schema) => schema.optional(),
+  }),
 });
 
 type ReservationFormProps = {
@@ -118,6 +129,8 @@ const ReservationForm = ({
     mode: "onChange",
     resolver: yupResolver(reservationFormValidationSchema),
     defaultValues: {
+      isContracted: reservation ? reservation.isContracted : false,
+      companyName: reservation ? reservation.companyName : '',
       ...(reservation && {
         userName: reservation.userSnapshot.name,
         userFirstName: reservation.userSnapshot.firstName,
@@ -136,6 +149,7 @@ const ReservationForm = ({
 
   const startDate = watch("startDate");
   const endDate = watch("endDate");
+  const isContracted = watch("isContracted");
 
   // Fetch available rooms when dates change
   useEffect(() => {
@@ -175,6 +189,8 @@ const ReservationForm = ({
       numberOfChildren: values.numberOfChildren,
       numberOfAdults: values.numberOfAdults,
       pricePaid: values.pricePaid,
+      isContracted: values.isContracted,
+      companyName: values.isContracted ? values.companyName : undefined,
       ...(values.review && { review: values.review }),
     };
 
@@ -221,7 +237,7 @@ const ReservationForm = ({
             </Flex>
           </CardHeader>
           <CardBody p={4}>
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={4}>
               <CustomFormControl
                 label={"Nom"}
                 errorField={errors.userName}
@@ -248,6 +264,37 @@ const ReservationForm = ({
                 />
               </CustomFormControl>
             </SimpleGrid>
+
+            <Box borderTop="1px" borderColor={borderColor} pt={4}>
+              <SimpleGrid columns={{ base: 1, md: isContracted ? 2 : 1 }} spacing={4}>
+                <FormControl display="flex" alignItems="center">
+                  <FormLabel htmlFor="isContracted" mb="0">
+                    Client conventionné
+                  </FormLabel>
+                  <Switch 
+                    id="isContracted" 
+                    {...register("isContracted")} 
+                    isChecked={isContracted}
+                    colorScheme="primary"
+                  />
+                </FormControl>
+
+                {isContracted && (
+                  <CustomFormControl
+                    label={"Nom de l'entreprise"}
+                    errorField={errors.companyName}
+                    isRequired
+                  >
+                    <CustomInput
+                      type="text"
+                      name="companyName"
+                      register={register}
+                      placeholder="Entrez le nom de l'entreprise"
+                    />
+                  </CustomFormControl>
+                )}
+              </SimpleGrid>
+            </Box>
           </CardBody>
         </Card>
 
