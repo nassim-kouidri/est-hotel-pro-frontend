@@ -21,6 +21,7 @@ const getAllReservations = async (
   page: number = 0,
   size: number = 9,
   status?: string,
+  paymentStatus?: string,
   hotelRoomId?: string,
   startDate?: string,
   endDate?: string
@@ -32,6 +33,7 @@ const getAllReservations = async (
         page,
         size,
         ...(status && { status }),
+        ...(paymentStatus && { paymentStatus }),
         ...(hotelRoomId && { hotelRoomId }),
         startDate,
         endDate,

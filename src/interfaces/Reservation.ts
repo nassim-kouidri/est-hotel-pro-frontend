@@ -12,6 +12,12 @@ export interface UserSnapshot {
   numberPhone: string;
 }
 
+export enum PaymentStatus {
+  FULLY_PAID = "FULLY_PAID",
+  PARTIALLY_PAID = "PARTIALLY_PAID",
+  NOT_PAID = "NOT_PAID",
+}
+
 export interface CreateReservation {
   roomId: string;
   userSnapshot: UserSnapshot;
@@ -24,6 +30,8 @@ export interface CreateReservation {
   review?: number;
   isContracted: boolean;
   companyName?: string;
+  paymentStatus: PaymentStatus;
+  paymentRemark?: string;
 }
 
 export interface Reservation {
@@ -40,6 +48,8 @@ export interface Reservation {
   status: ReservationStatus;
   isContracted: boolean;
   companyName?: string;
+  paymentStatus: PaymentStatus;
+  paymentRemark?: string;
 }
 
 export interface ReservationChartData {

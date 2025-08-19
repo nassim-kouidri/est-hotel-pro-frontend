@@ -10,11 +10,13 @@ import { CATEGORY_ROOM_LABELS } from "../../data/HotelRoom";
 
 export type SelectedReservationFilters = {
   status: string;
+  paymentStatus: string;
   hotelRoomId: string;
 };
 
 interface IReservationFiltersFormValues {
   status: string;
+  paymentStatus: string;
   hotelRoomId: string;
 }
 
@@ -57,6 +59,17 @@ const ReservationFilters = ({
               {RESERVATION_STATUS_LABELS[status]}
             </option>
           ))}
+        </Select>
+        <Select
+          {...register("paymentStatus")}
+          placeholder={"Sélectionner l'info du paiement"}
+          focusBorderColor="primary.300"
+          size="md"
+          bg="white"
+        >
+          <option value="FULLY_PAID">Payé entièrement</option>
+          <option value="PARTIALLY_PAID">Payé partiellement</option>
+          <option value="NOT_PAID">Rien payé</option>
         </Select>
         <Select
           {...register("hotelRoomId")}

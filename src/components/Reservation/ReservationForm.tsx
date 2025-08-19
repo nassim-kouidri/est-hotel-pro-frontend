@@ -39,6 +39,7 @@ import {
   CreateReservation,
   Reservation,
   UserSnapshot,
+  PaymentStatus,
 } from "../../interfaces/Reservation";
 import { FormMode } from "../../helpers/FormUtils";
 import { HotelRoom } from "../../interfaces/HotelRoom";
@@ -60,6 +61,8 @@ interface IReservationFormValues {
   review?: number | null;
   isContracted: boolean;
   companyName?: string;
+  paymentStatus: PaymentStatus;
+  paymentRemark?: string;
 }
 
 const reservationFormValidationSchema = yup.object().shape({
@@ -97,6 +100,15 @@ const reservationFormValidationSchema = yup.object().shape({
     then: (schema) => schema.required("Le nom de l'entreprise est obligatoire pour les clients conventionnés"),
     otherwise: (schema) => schema.optional(),
   }),
+  paymentStatus: yup.mixed<PaymentStatus>()
+    .oneOf([PaymentStatus.FULLY_PAID, PaymentStatus.PARTIALLY_PAID, PaymentStatus.NOT_PAID])
+    .required(CHAMP_OBLIGATOIRE)
+    .default(PaymentStatus.FULLY_PAID),
+  paymentRemark: yup.string().when('paymentStatus', {
+    is: (val: PaymentStatus) => val === PaymentStatus.FULLY_PAID,
+    then: (schema) => schema.test('empty-if-fully', 'Ce champ doit être vide lorsque le statut est payé entièrement', (val) => !val || val.trim() === '').optional(),
+    otherwise: (schema) => schema.required(CHAMP_OBLIGATOIRE),
+  }),
 });
 
 type ReservationFormProps = {
@@ -131,6 +143,8 @@ const ReservationForm = ({
     defaultValues: {
       isContracted: reservation ? reservation.isContracted : false,
       companyName: reservation ? reservation.companyName : '',
+      paymentStatus: reservation ? reservation.paymentStatus : PaymentStatus.FULLY_PAID,
+      paymentRemark: reservation ? reservation.paymentRemark : '',
       ...(reservation && {
         userName: reservation.userSnapshot.name,
         userFirstName: reservation.userSnapshot.firstName,
@@ -150,6 +164,7 @@ const ReservationForm = ({
   const startDate = watch("startDate");
   const endDate = watch("endDate");
   const isContracted = watch("isContracted");
+  const paymentStatus = watch("paymentStatus");
 
   // Fetch available rooms when dates change
   useEffect(() => {
@@ -191,6 +206,10 @@ const ReservationForm = ({
       pricePaid: values.pricePaid,
       isContracted: values.isContracted,
       companyName: values.isContracted ? values.companyName : undefined,
+      paymentStatus: values.paymentStatus,
+      ...(values.paymentStatus !== PaymentStatus.FULLY_PAID && values.paymentRemark
+        ? { paymentRemark: values.paymentRemark }
+        : {}),
       ...(values.review && { review: values.review }),
     };
 
@@ -322,7 +341,7 @@ const ReservationForm = ({
             </Flex>
           </CardHeader>
           <CardBody p={4}>
-            {/* Room and Price */}
+            {/* Room, Price and Payment */}
             <Box mb={5}>
               <Flex align="center" mb={3}>
                 <Icon as={FaBed} mr={2} color={iconColor} size="sm" />
@@ -434,6 +453,46 @@ const ReservationForm = ({
                     </InputRightElement>
                   </InputGroup>
                 </CustomFormControl>
+              </SimpleGrid>
+            </Box>
+
+            {/* Statut du paiement */}
+            <Box mb={5}>
+              <Flex align="center" mb={3}>
+                <Icon as={FaInfoCircle} mr={2} color={iconColor} size="sm" />
+                <Text fontWeight="medium">Paiement</Text>
+              </Flex>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                <CustomFormControl
+                  label={"Statut du paiement"}
+                  errorField={errors.paymentStatus as any}
+                  isRequired
+                >
+                  <Select
+                    {...register("paymentStatus")}
+                    focusBorderColor="primary.300"
+                    size="md"
+                    bg="white"
+                  >
+                    <option value={PaymentStatus.FULLY_PAID}>Payé entièrement</option>
+                    <option value={PaymentStatus.PARTIALLY_PAID}>Payé partiellement</option>
+                    <option value={PaymentStatus.NOT_PAID}>Rien payé</option>
+                  </Select>
+                </CustomFormControl>
+
+                {paymentStatus !== PaymentStatus.FULLY_PAID && (
+                  <CustomFormControl
+                    label={"Remarque"}
+                    errorField={errors.paymentRemark}
+                    isRequired
+                  >
+                    <CustomTextArea
+                      name="paymentRemark"
+                      register={register}
+                      placeholder="Veuillez saisir une remarque sur le paiement"
+                    />
+                  </CustomFormControl>
+                )}
               </SimpleGrid>
             </Box>
 

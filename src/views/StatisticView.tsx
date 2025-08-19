@@ -38,6 +38,7 @@ const StatisticView = () => {
         0, 
         1000, 
         "IN_PROGRESS", 
+        undefined,
         undefined, 
         today, 
         futureDateStr
