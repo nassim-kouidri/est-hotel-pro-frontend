@@ -341,6 +341,50 @@ const ReservationForm = ({
             </Flex>
           </CardHeader>
           <CardBody p={4}>
+            {/* Dates */}
+            <Box mb={5}>
+              <Flex align="center" mb={3}>
+                <Icon as={FaCalendarAlt} mr={2} color={iconColor} size="sm" />
+                <Text fontWeight="medium">Dates du séjour</Text>
+              </Flex>
+
+              {formMode === FormMode.CREATION && (
+                <Flex align="center" mb={3} bg="blue.50" p={2} borderRadius="md" borderWidth="1px" borderColor="blue.200">
+                  <Icon as={FaInfoCircle} mr={2} color="blue.500" />
+                  <Text fontSize="sm" color="blue.700">
+                    Sélectionnez les dates de séjour pour voir les chambres disponibles sur cette période
+                  </Text>
+                </Flex>
+              )}
+
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                <CustomFormControl
+                  label={"Début"}
+                  errorField={errors.startDate}
+                  isRequired
+                >
+                  <CustomInput
+                    type="date"
+                    name="startDate"
+                    register={register}
+                    disabled={formMode === FormMode.MODIFICATION}
+                  />
+                </CustomFormControl>
+                <CustomFormControl
+                  label={"Fin"}
+                  errorField={errors.endDate}
+                  isRequired
+                >
+                  <CustomInput
+                    type="date"
+                    name="endDate"
+                    register={register}
+                    disabled={formMode === FormMode.MODIFICATION}
+                  />
+                </CustomFormControl>
+              </SimpleGrid>
+            </Box>
+
             {/* Room, Price and Payment */}
             <Box mb={5}>
               <Flex align="center" mb={3}>
@@ -381,7 +425,7 @@ const ReservationForm = ({
                               >
                                 {availableRooms.map((room) => (
                                   <option value={room.id} key={room.id}>
-                                    {`n°${room.roomNumber} (${
+                                    {`n°${room.roomNumber} (${ 
                                       CATEGORY_ROOM_LABELS[room.category]
                                     })`}
                                   </option>
@@ -427,7 +471,7 @@ const ReservationForm = ({
                     >
                       {allRooms.map((room) => (
                         <option value={room.id} key={room.id}>
-                          {`n°${room.roomNumber} (${
+                          {`n°${room.roomNumber} (${ 
                             CATEGORY_ROOM_LABELS[room.category]
                           })`}
                         </option>
@@ -493,50 +537,6 @@ const ReservationForm = ({
                     />
                   </CustomFormControl>
                 )}
-              </SimpleGrid>
-            </Box>
-
-            {/* Dates */}
-            <Box mb={5}>
-              <Flex align="center" mb={3}>
-                <Icon as={FaCalendarAlt} mr={2} color={iconColor} size="sm" />
-                <Text fontWeight="medium">Dates du séjour</Text>
-              </Flex>
-
-              {formMode === FormMode.CREATION && (
-                <Flex align="center" mb={3} bg="blue.50" p={2} borderRadius="md" borderWidth="1px" borderColor="blue.200">
-                  <Icon as={FaInfoCircle} mr={2} color="blue.500" />
-                  <Text fontSize="sm" color="blue.700">
-                    Sélectionnez les dates de séjour pour voir les chambres disponibles sur cette période
-                  </Text>
-                </Flex>
-              )}
-
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                <CustomFormControl
-                  label={"Début"}
-                  errorField={errors.startDate}
-                  isRequired
-                >
-                  <CustomInput
-                    type="date"
-                    name="startDate"
-                    register={register}
-                    disabled={formMode === FormMode.MODIFICATION}
-                  />
-                </CustomFormControl>
-                <CustomFormControl
-                  label={"Fin"}
-                  errorField={errors.endDate}
-                  isRequired
-                >
-                  <CustomInput
-                    type="date"
-                    name="endDate"
-                    register={register}
-                    disabled={formMode === FormMode.MODIFICATION}
-                  />
-                </CustomFormControl>
               </SimpleGrid>
             </Box>
 

@@ -37,7 +37,7 @@ const Navbar = () => {
           onClick={navigateToHome}
         >
           <img src={logo} alt="Site Logo" style={{ height: "3.6rem" }} />
-          <Text fontSize={"2xl"}>{"Est Hotel Backoffice"}</Text>
+          <Text fontSize={"2xl"}>{"Étoile de l'Est Backoffice"}</Text>
         </div>
 
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
