@@ -22,6 +22,7 @@ const getAllReservations = async (
   size: number = 9,
   status?: string,
   paymentStatus?: string,
+  companyName?: string,
   hotelRoomId?: string,
   startDate?: string,
   endDate?: string
@@ -34,6 +35,7 @@ const getAllReservations = async (
         size,
         ...(status && { status }),
         ...(paymentStatus && { paymentStatus }),
+        ...(companyName && { companyName }),
         ...(hotelRoomId && { hotelRoomId }),
         startDate,
         endDate,
@@ -109,6 +111,17 @@ const getMonthlyCalendar = async (token: string, year: number, month: number) =>
   );
 };
 
+const getContractedCompanies = async (token: string) => {
+  return axios.get<string[]>(
+    `${API_BASE_URL}/ede-api/v1/reservations/companies`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
 export const ReservationService = {
   getReservationById,
   getAllReservations,
@@ -117,4 +130,5 @@ export const ReservationService = {
   updateReservation,
   deleteReservation,
   getMonthlyCalendar,
+  getContractedCompanies,
 };

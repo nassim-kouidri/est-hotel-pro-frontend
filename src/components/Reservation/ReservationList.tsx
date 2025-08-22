@@ -44,6 +44,7 @@ const ReservationList = () => {
     useState<SelectedReservationFilters>({
       status: "",
       paymentStatus: "",
+      companyName: "",
       hotelRoomId: "",
     });
 
@@ -105,6 +106,7 @@ const ReservationList = () => {
         9,
         selectedReservationFilters.status,
         selectedReservationFilters.paymentStatus,
+        selectedReservationFilters.companyName,
         selectedReservationFilters.hotelRoomId,
         effectiveStartDate,
         effectiveEndDate

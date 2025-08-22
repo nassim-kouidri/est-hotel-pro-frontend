@@ -1,22 +1,26 @@
 import { Select } from "@chakra-ui/react";
 import { useForm, useWatch } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { HotelRoom } from "../../interfaces/HotelRoom";
 import {
   RESERVATION_STATUS,
   RESERVATION_STATUS_LABELS,
 } from "../../data/Reservation";
 import { CATEGORY_ROOM_LABELS } from "../../data/HotelRoom";
+import { useAuth } from "../../contexts/auth";
+import { ReservationService } from "../../services/ReservationService";
 
 export type SelectedReservationFilters = {
   status: string;
   paymentStatus: string;
+  companyName: string;
   hotelRoomId: string;
 };
 
 interface IReservationFiltersFormValues {
   status: string;
   paymentStatus: string;
+  companyName: string;
   hotelRoomId: string;
 }
 
@@ -31,6 +35,17 @@ const ReservationFilters = ({
 }: ReservationFiltersProps) => {
   const { register, control, handleSubmit } =
     useForm<IReservationFiltersFormValues>();
+
+  const { user } = useAuth();
+  const [companies, setCompanies] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      ReservationService.getContractedCompanies(user.token)
+        .then((res) => setCompanies(res.data))
+        .catch(() => setCompanies([]));
+    }
+  }, [user]);
 
   const watchedFileds = useWatch({ control });
 
@@ -62,7 +77,7 @@ const ReservationFilters = ({
         </Select>
         <Select
           {...register("paymentStatus")}
-          placeholder={"Sélectionner l'info du paiement"}
+          placeholder={"Tous les paiements"}
           focusBorderColor="primary.300"
           size="md"
           bg="white"
@@ -70,6 +85,17 @@ const ReservationFilters = ({
           <option value="FULLY_PAID">Payé entièrement</option>
           <option value="PARTIALLY_PAID">Payé partiellement</option>
           <option value="NOT_PAID">Rien payé</option>
+        </Select>
+        <Select
+          {...register("companyName")}
+          placeholder={"Toutes les compagnies"}
+          focusBorderColor="primary.300"
+          size="md"
+          bg="white"
+        >
+          {companies.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
         </Select>
         <Select
           {...register("hotelRoomId")}
