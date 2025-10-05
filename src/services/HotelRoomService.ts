@@ -1,6 +1,7 @@
 import axios from "axios";
 import { CreateHotelRoom, HotelRoom } from "../interfaces/HotelRoom";
 import { API_BASE_URL } from "../data/constants";
+import { Page } from "../interfaces/Reservation";
 
 const getRoomById = async (token: string, roomId: string) => {
   return axios.get(`${API_BASE_URL}/ede-api/v1/hotel-rooms/${roomId}`, {
@@ -19,6 +20,29 @@ const getFilteredRooms = async (
     `${API_BASE_URL}/ede-api/v1/hotel-rooms/filter`,
     {
       params: {
+        ...(category && { category }),
+        ...(available !== undefined && { available }),
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+const getFilteredRoomsPageable = async (
+  token: string,
+  page: number = 0,
+  size: number = 9,
+  category?: string,
+  available?: boolean
+) => {
+  return axios.get<Page<HotelRoom>>(
+    `${API_BASE_URL}/ede-api/v1/hotel-rooms/filter/pageable`,
+    {
+      params: {
+        page,
+        size,
         ...(category && { category }),
         ...(available !== undefined && { available }),
       },
@@ -123,6 +147,7 @@ const getAvailableRoomsBetweenDates = async (token: string, startDate: string, e
 export const HotelRoomService = {
   getRoomById,
   getFilteredRooms,
+  getFilteredRoomsPageable,
   getAllRooms,
   getAllAvailableRooms,
   getAllRoomsByCategory,

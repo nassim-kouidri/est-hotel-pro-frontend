@@ -10,6 +10,7 @@ import {
   Spinner,
   Text,
   useColorModeValue,
+  Button,
 } from "@chakra-ui/react";
 import { InfoIcon } from "@chakra-ui/icons";
 import { HotelRoom } from "../../interfaces/HotelRoom";
@@ -25,6 +26,9 @@ const HotelRoomList = () => {
   const [hotelRooms, setHotelRooms] = useState<HotelRoom[]>([]);
   const [hotelRoomsAreLoading, setHotelRoomsAreLoading] =
     useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [totalElements, setTotalElements] = useState<number>(0);
 
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
@@ -49,6 +53,7 @@ const HotelRoomList = () => {
   }, [
     selectedHotelRoomFilters.categoryRoom,
     selectedHotelRoomFilters.roomStatus,
+    currentPage,
   ]);
 
   const fetchHotelRooms = () => {
@@ -61,12 +66,19 @@ const HotelRoomList = () => {
 
     if (user) {
       setHotelRoomsAreLoading(true);
-      HotelRoomService.getFilteredRooms(
+      HotelRoomService.getFilteredRoomsPageable(
         user.token,
+        currentPage,
+        9,
         selectedHotelRoomFilters.categoryRoom,
         isAvailable
       )
-        .then((hotelRoomsRes) => setHotelRooms(hotelRoomsRes.data))
+        .then((hotelRoomsRes) => {
+          const pageData = hotelRoomsRes.data;
+          setHotelRooms(pageData.content);
+          setTotalPages(pageData.totalPages);
+          setTotalElements(pageData.totalElements);
+        })
         .catch(() =>
           pushToast({
             content: "Erreur lors de la récupération des chambres",
@@ -89,6 +101,7 @@ const HotelRoomList = () => {
   };
 
   const applyFilters = (filters: SelectedHotelRoomFilters) => {
+    setCurrentPage(0);
     setSelectedHotelRoomFilters(filters);
   };
 
@@ -129,15 +142,47 @@ const HotelRoomList = () => {
           {hotelRooms.length === 0 ? (
             <Text>{"Aucune chambre trouvée"}</Text>
           ) : (
-            <SimpleGrid columns={3} spacing={6}>
-              {hotelRooms.map((hotelRoom) => (
-                <HotelRoomItem
-                  key={hotelRoom.id}
-                  hotelRoom={hotelRoom}
-                  openDetailedModal={openDetailedModal}
-                />
-              ))}
-            </SimpleGrid>
+            <>
+              <SimpleGrid columns={3} spacing={6}>
+                {hotelRooms.map((hotelRoom) => (
+                  <HotelRoomItem
+                    key={hotelRoom.id}
+                    hotelRoom={hotelRoom}
+                    openDetailedModal={openDetailedModal}
+                  />
+                ))}
+              </SimpleGrid>
+
+              {/* Pagination Controls */}
+              <Flex mt={6} align="center" justify="space-between">
+                <Text fontSize="sm" color="gray.500">
+                  {totalElements} résultat{totalElements > 1 ? "s" : ""}
+                </Text>
+                <Flex gap={2} align="center">
+                  <Button
+                    size="sm"
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
+                    isDisabled={currentPage === 0}
+                  >
+                    Précédent
+                  </Button>
+                  <Text fontSize="sm">
+                    Page {currentPage + 1} / {Math.max(totalPages, 1)}
+                  </Text>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((p) =>
+                        totalPages > 0 ? Math.min(p + 1, totalPages - 1) : 0
+                      )
+                    }
+                    isDisabled={totalPages === 0 || currentPage >= totalPages - 1}
+                  >
+                    Suivant
+                  </Button>
+                </Flex>
+              </Flex>
+            </>
           )}
         </>
       )}
