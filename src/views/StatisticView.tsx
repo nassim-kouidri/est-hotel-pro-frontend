@@ -1,201 +1,137 @@
-import { Box, Heading, Flex, Divider, Text, SimpleGrid, Stat, StatLabel, StatNumber, StatHelpText, Icon, useColorModeValue } from "@chakra-ui/react";
-import ReservationChart from "../components/Reservation/ReservationChart";
+import { Box, Heading, Flex, Divider, SimpleGrid, Text } from "@chakra-ui/react";
 import PageContainer from "../layout/PageContainer";
-// import logoImage from "../assets/logo-est-hotel-pro.png";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/auth";
-import { ReservationService } from "../services/ReservationService";
-import { FaChartLine, FaCalendarCheck, FaBed } from "react-icons/fa";
+import { StatisticsService } from "../services/StatisticsService";
+import { OverviewStatsResponse, DailyOccupancyPoint, DailyReservationPoint, CategorySlice, PaymentStatusSlice, CompanyTop } from "../interfaces/Statistics";
+import DateRangePicker from "../components/Statistics/DateRangePicker";
+import KpiCards from "../components/Statistics/KpiCards";
+import OccupancyLineChart from "../components/Statistics/OccupancyLineChart";
+import ReservationsRevenueChart from "../components/Statistics/ReservationsRevenueChart";
+import CategoryDistribution from "../components/Statistics/CategoryDistribution";
+import PaymentStatusDistribution from "../components/Statistics/PaymentStatusDistribution";
+import TopCompanies from "../components/Statistics/TopCompanies";
+import ExportButtons from "../components/Statistics/ExportButtons";
+
+const toIso = (d: Date) => d.toISOString().split("T")[0];
 
 const StatisticView = () => {
-  const [totalReservations, setTotalReservations] = useState<number>(0);
-  const [activeReservations, setActiveReservations] = useState<number>(0);
   const { user } = useAuth();
 
-  const cardBg = useColorModeValue("white", "gray.700");
-  const statBg = useColorModeValue("primary.50", "primary.900");
+  // Date range state: default to last 30 days [start, end)
+  const today = useMemo(() => new Date(), []);
+  const defaultEnd = useMemo(() => toIso(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)), [today]);
+  const defaultStart = useMemo(() => toIso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 29)), [today]);
+  const [startDate, setStartDate] = useState<string>(defaultStart);
+  const [endDate, setEndDate] = useState<string>(defaultEnd);
 
+  // Data states
+  const [overview, setOverview] = useState<OverviewStatsResponse | undefined>();
+  const [occupancy, setOccupancy] = useState<DailyOccupancyPoint[]>([]);
+  const [daily, setDaily] = useState<DailyReservationPoint[]>([]);
+  const [categories, setCategories] = useState<CategorySlice[]>([]);
+  const [payments, setPayments] = useState<PaymentStatusSlice[]>([]);
+  const [companies, setCompanies] = useState<CompanyTop[]>([]);
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  // Fetch all datasets when user or date range changes
   useEffect(() => {
-    if (user) {
-      // Fetch all reservations to get the total count
-      ReservationService.getAllReservationsForChart(user.token)
-        .then((res) => {
-          setTotalReservations(res.data.length);
-        })
-        .catch((error) => {
-          console.error("Error fetching reservation data:", error);
-        });
+    if (!user) return;
+    const ac = new AbortController();
+    const token = user.token;
+    setLoading(true);
+    setError(undefined);
 
-      // Fetch active reservations (IN_PROGRESS)
-      // Get today's date for startDate and a future date for endDate
-      const today = new Date().toISOString().split('T')[0];
-      const futureDate = new Date();
-      futureDate.setFullYear(futureDate.getFullYear() + 1); // One year from now
-      const futureDateStr = futureDate.toISOString().split('T')[0];
+    Promise.all([
+      StatisticsService.getOverview(token, startDate, endDate, ac.signal),
+      StatisticsService.getDailyOccupancy(token, startDate, endDate, ac.signal),
+      StatisticsService.getDailyReservations(token, startDate, endDate, ac.signal),
+      StatisticsService.getCategorySlice(token, startDate, endDate, ac.signal),
+      StatisticsService.getPaymentStatusSlice(token, startDate, endDate, ac.signal),
+      StatisticsService.getTopCompanies(token, startDate, endDate, 5, ac.signal),
+    ])
+      .then(([ov, occ, dres, cat, pay, top]) => {
+        setOverview(ov.data);
+        setOccupancy(occ.data);
+        setDaily(dres.data);
+        setCategories(cat.data);
+        setPayments(pay.data);
+        setCompanies(top.data);
+      })
+      .catch((e) => {
+        if (e?.message && e.name !== "CanceledError") setError("Erreur lors du chargement des statistiques");
+        // eslint-disable-next-line no-console
+        console.error("Statistics load error", e);
+      })
+      .finally(() => setLoading(false));
 
-      ReservationService.getAllReservations(
-        user.token, 
-        0, 
-        1000, 
-        "IN_PROGRESS", 
-        undefined,
-        undefined,
-        undefined, 
-        today, 
-        futureDateStr
-      )
-        .then((res) => {
-          setActiveReservations(res.data.totalElements);
-        })
-        .catch((error) => {
-          console.error("Error fetching active reservations:", error);
-        });
-    }
-  }, [user]);
+    return () => ac.abort();
+  }, [user, startDate, endDate]);
+
+  // CSV export helpers
+  const exportCsv = (filename: string, rows: string[][]) => {
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replaceAll('"', '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const onExportOccupancy = () => {
+    const rows: string[][] = [["date", "occupancyRate", "occupiedRoomNights"]];
+    occupancy.forEach((p) => rows.push([p.date, String(p.occupancyRate), String(p.occupiedRoomNights)]));
+    exportCsv(`occupation_${startDate}_${endDate}.csv`, rows);
+  };
+
+  const onExportReservations = () => {
+    const rows: string[][] = [["date", "reservations", "revenue"]];
+    daily.forEach((p) => rows.push([p.date, String(p.reservations), String(p.revenue)]));
+    exportCsv(`reservations_revenus_${startDate}_${endDate}.csv`, rows);
+  };
 
   return (
     <PageContainer>
-      <Box 
-        maxWidth={"1500px"} 
-        mx="auto" 
-        p={6} 
-        borderRadius="md" 
-        boxShadow="sm" 
-        bg="white"
-      >
-        <Flex direction="column" align="center" mb={4}>
-          {/*<Image*/}
-          {/*  src={logoImage}*/}
-          {/*  alt="Est Hotel Pro Logo"*/}
-          {/*  maxWidth="150px"*/}
-          {/*  mb={4}*/}
-          {/*/>*/}
-          <Heading as="h2" size="lg" textAlign={"center"} fontWeight="medium">
-            {"Statistiques"}
-          </Heading>
+      <Box maxWidth="1200px" mx="auto" p={6}>
+        <Flex justify="space-between" align="center" wrap="wrap" gap={4} mb={4}>
+          <Heading as="h2" size="lg" fontWeight="medium">Statistiques</Heading>
+          <DateRangePicker startDate={startDate} endDate={endDate} onChange={(s, e) => { setStartDate(s); setEndDate(e); }} />
         </Flex>
 
         <Divider my={4} />
 
-        {/* Summary Stats */}
+        {/* KPI Cards */}
         <Box mb={8}>
-          <Heading as="h3" size="md" mb={4} fontWeight="medium">
-            {"Résumé"}
-          </Heading>
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-            {/* Total Reservations */}
-            <Box 
-              p={5} 
-              borderRadius="lg" 
-              boxShadow="sm" 
-              bg={cardBg}
-              borderWidth="1px"
-              borderColor="gray.200"
-              transition="transform 0.3s"
-              _hover={{ transform: "translateY(-5px)", boxShadow: "md" }}
-            >
-              <Flex align="center">
-                <Box 
-                  p={3} 
-                  borderRadius="full" 
-                  bg={statBg} 
-                  color="primary.500"
-                  mr={4}
-                >
-                  <Icon as={FaChartLine} boxSize={5} />
-                </Box>
-                <Stat>
-                  <StatLabel fontSize="md" fontWeight="medium">Total des réservations</StatLabel>
-                  <StatNumber fontSize="2xl" fontWeight="bold" color="primary.500">
-                    {totalReservations}
-                  </StatNumber>
-                  <StatHelpText>Depuis la création</StatHelpText>
-                </Stat>
-              </Flex>
-            </Box>
-
-            {/* Active Reservations */}
-            <Box 
-              p={5} 
-              borderRadius="lg" 
-              boxShadow="sm" 
-              bg={cardBg}
-              borderWidth="1px"
-              borderColor="gray.200"
-              transition="transform 0.3s"
-              _hover={{ transform: "translateY(-5px)", boxShadow: "md" }}
-            >
-              <Flex align="center">
-                <Box 
-                  p={3} 
-                  borderRadius="full" 
-                  bg={statBg} 
-                  color="primary.500"
-                  mr={4}
-                >
-                  <Icon as={FaCalendarCheck} boxSize={5} />
-                </Box>
-                <Stat>
-                  <StatLabel fontSize="md" fontWeight="medium">Réservations en cours</StatLabel>
-                  <StatNumber fontSize="2xl" fontWeight="bold" color="primary.500">
-                    {activeReservations}
-                  </StatNumber>
-                  <StatHelpText>Actuellement</StatHelpText>
-                </Stat>
-              </Flex>
-            </Box>
-
-            {/* Occupancy Rate */}
-            <Box 
-              p={5} 
-              borderRadius="lg" 
-              boxShadow="sm" 
-              bg={cardBg}
-              borderWidth="1px"
-              borderColor="gray.200"
-              transition="transform 0.3s"
-              _hover={{ transform: "translateY(-5px)", boxShadow: "md" }}
-            >
-              <Flex align="center">
-                <Box 
-                  p={3} 
-                  borderRadius="full" 
-                  bg={statBg} 
-                  color="primary.500"
-                  mr={4}
-                >
-                  <Icon as={FaBed} boxSize={5} />
-                </Box>
-                <Stat>
-                  <StatLabel fontSize="md" fontWeight="medium">Taux d'occupation</StatLabel>
-                  <StatNumber fontSize="2xl" fontWeight="bold" color="primary.500">
-                    {activeReservations > 0 ? "Actif" : "Inactif"}
-                  </StatNumber>
-                  <StatHelpText>État actuel</StatHelpText>
-                </Stat>
-              </Flex>
-            </Box>
-          </SimpleGrid>
+          <KpiCards data={overview} isLoading={loading} />
         </Box>
 
-        {/* Chart Section */}
-        <Box mb={6}>
-          <Heading as="h3" size="md" mb={4} fontWeight="medium">
-            {"Évolution des réservations"}
-          </Heading>
-          <Text mb={4} color="gray.600">
-            {"Ce graphique montre le nombre de réservations par jour."}
-          </Text>
-          <Box 
-            p={4} 
-            borderWidth="1px" 
-            borderRadius="lg" 
-            boxShadow="xs"
-            bg="white"
-          >
-            <ReservationChart />
-          </Box>
+        {/* Time series */}
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={8}>
+          <OccupancyLineChart points={occupancy} isLoading={loading} error={error} />
+          <ReservationsRevenueChart points={daily} isLoading={loading} error={error} />
+        </SimpleGrid>
+
+        <Flex justify="flex-end" mb={6}>
+          <ExportButtons onExportOccupancy={onExportOccupancy} onExportReservations={onExportReservations} />
+        </Flex>
+
+        {/* Distributions */}
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+          <CategoryDistribution slices={categories} isLoading={loading} error={error} />
+          <PaymentStatusDistribution slices={payments} isLoading={loading} error={error} />
+        </SimpleGrid>
+
+        <Box mt={6}>
+          <TopCompanies items={companies} isLoading={loading} error={error} />
         </Box>
+
+        {!loading && error && (
+          <Text mt={4} color="red.500">{error}</Text>
+        )}
       </Box>
     </PageContainer>
   );
